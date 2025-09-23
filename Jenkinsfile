@@ -40,21 +40,30 @@ pipeline {
         }
 
 		stage('Build & Push Image') {
-			environment {
-				JAR_VERSION = sh(returnStdout: true, script: "grep -r 'BUILD_VERSION' gradle.log | grep -P '\\d{0,3}\\.\\d{0,3}\\.\\d{0,3}' -o").trim()
-			}
-			steps {
-				script {
-					if (gitlabBranch.contains("refs/tags/")) {
-						IMAGE_VERSION = sh(returnStdout: true, script: "echo $gitlabBranch | grep -P '\\d{0,3}\\.\\d{0,3}\\.\\d{0,3}' -o").trim()
-					} else {
-						IMAGE_VERSION = JAR_VERSION
-					}
-				}
-				container('kaniko') {
-					sh "/kaniko/executor --context `pwd` --dockerfile `pwd`/Dockerfile --destination docker.comes.co.kr/${IMAGE_PATH}/${IMAGE_NAME}${IMAGE_VERSION}"
-				}
-			}
+// 			environment {
+// 				JAR_VERSION = sh(returnStdout: true, script: "grep -r 'BUILD_VERSION' gradle.log | grep -P '\\d{0,3}\\.\\d{0,3}\\.\\d{0,3}' -o").trim()
+// 			}
+// 			steps {
+// 				script {
+// 					if (gitlabBranch.contains("refs/tags/")) {
+// 						IMAGE_VERSION = sh(returnStdout: true, script: "echo $gitlabBranch | grep -P '\\d{0,3}\\.\\d{0,3}\\.\\d{0,3}' -o").trim()
+// 					} else {
+// 						IMAGE_VERSION = JAR_VERSION
+// 					}
+// 				}
+// 				container('kaniko') {
+// 					sh "/kaniko/executor --context `pwd` --dockerfile `pwd`/Dockerfile --destination docker.hooni.co.kr/${IMAGE_PATH}/${IMAGE_NAME}${IMAGE_VERSION}"
+// 				}
+// 			}
+            steps {
+                container('kaniko') {
+                    sh """
+                        /kaniko/executor --context `pwd` \
+                                         --dockerfile `pwd`/Dockerfile \
+                                         --destination docker.hooni.co.kr/${IMAGE_PATH}/${IMAGE_NAME}${IMAGE_VERSION}
+                    """
+                }
+            }
 
 			post {
 				failure {
