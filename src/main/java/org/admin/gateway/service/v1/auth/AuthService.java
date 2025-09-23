@@ -53,8 +53,6 @@ public class AuthService {
     // 로그인
     public Mono<AuthResponse> login(LoginRequest loginRequest) {
         return userDetails(loginRequest.getUserId())
-                .doOnNext(user -> log.info("조회된 유저: {}", user))
-                .doOnError(err -> log.error("userDetails 에러 발생", err))
                 .flatMap(user -> handleLogin(user, loginRequest.getPassword()))
                 .switchIfEmpty(Mono.just(AuthResponse.getLoginFail()));
     }
@@ -65,11 +63,8 @@ public class AuthService {
             String accessToken = jwtTokenProvider.generateAccessToken(user);
             String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-            log.info("AccessToken: {}", accessToken);
-            log.info("RefreshToken: {}", refreshToken);
-
             // 로그인 성공 시 refreshToken 저장
-//            refreshTokenService.saveRefreshToken(user.getUserCode(), refreshToken);
+            refreshTokenService.saveRefreshToken(user.getUserCode(), refreshToken);
 
             return Mono.just(AuthResponse.getSuccess(accessToken, refreshToken));
         }
