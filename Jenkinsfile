@@ -82,7 +82,7 @@ pipeline {
 				sh "mkdir argocd"
 
 				dir("argocd"){
-					git credentialsId: "comes-gitlab", url: "https://${ARGOCD_GIT_URL}", branch: "${ARGOCD_GIT_BRANCH}"
+                    git credentialsId: "github-api-token", url: "https://${ARGOCD_GIT_URL}", branch: "${ARGOCD_GIT_BRANCH}"
 
 					sh "git config user.email 'lee990726@gmail.com'"
                     sh "git config user.name 'Hooni'"
