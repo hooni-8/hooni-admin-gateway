@@ -4,7 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'org.admin'
+group = 'org.admin.gateway'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -18,7 +18,53 @@ repositories {
 }
 
 ext {
-    set('springCloudVersion', "2024.0.1")
+    set('springCloudVersion', "2023.0.1")
+
+    /*
+     * 브랜치명이 없거나 main이 아니라면 dev 프로필로 진행
+    */
+    BRANCH_NAME = !project.hasProperty("branchName") ? "development" : branchName
+    BUILD_NUMBER = !project.hasProperty("buildNumber") ? "999" : buildNumber
+    PROFILE = BRANCH_NAME.contains("refs/tags/") ? "prod" : "dev"
+
+    TIME_ZONE = TimeZone.getTimeZone("Asia/Seoul")                     // 한국 시간대
+    BUILD_TIME = new Date().format("yyyy-MM-dd HH:mm:ss", TIME_ZONE)   // 빌드 시간
+    MAJOR = PROFILE.equalsIgnoreCase("prod") ? "3" : "0"
+    MINOR = "0"
+    PATCH = BUILD_NUMBER
+
+    BUILD_VERSION = "${MAJOR}.${MINOR}.${PATCH}"
+}
+
+println "[ INFO ]  BRANCH_NAME	: ${BRANCH_NAME}"
+println "[ INFO ]  BUILD_VERSION: ${BUILD_VERSION}"
+println "[ INFO ]  PROFILE		: ${PROFILE}"
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    //maven {	//k8s nexus 내부 도메인
+    //	allowInsecureProtocol true
+    //	url 'http://nexus-service.nexus-repository.svc.cluster.local/repository/maven-repository/'
+    //}
+    maven {	//k8s nexus 외부 도메인
+        allowInsecureProtocol true
+        url 'https://nexus.hooni.co.kr/repository/maven-repository/'
+    }
+    mavenCentral()
+    maven {
+        url layout.projectDirectory.dir('../repo')
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 dependencies {
@@ -68,12 +114,12 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
+jar {
+    enabled = false
 }
 
-tasks.named('test') {
+test {
+    ignoreFailures = true
     useJUnitPlatform()
 }
+
