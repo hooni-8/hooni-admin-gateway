@@ -5,7 +5,7 @@ pipeline {
         node {
             label 'kaniko-pod'
         }
-    }
+   }
 
 	environment {
 		IMAGE_PATH = "admin"
@@ -40,21 +40,6 @@ pipeline {
         }
 
 		stage('Build & Push Image') {
-// 			environment {
-// 				JAR_VERSION = sh(returnStdout: true, script: "grep -r 'BUILD_VERSION' gradle.log | grep -P '\\d{0,3}\\.\\d{0,3}\\.\\d{0,3}' -o").trim()
-// 			}
-// 			steps {
-// 				script {
-// 					if (gitlabBranch.contains("refs/tags/")) {
-// 						IMAGE_VERSION = sh(returnStdout: true, script: "echo $gitlabBranch | grep -P '\\d{0,3}\\.\\d{0,3}\\.\\d{0,3}' -o").trim()
-// 					} else {
-// 						IMAGE_VERSION = JAR_VERSION
-// 					}
-// 				}
-// 				container('kaniko') {
-// 					sh "/kaniko/executor --context `pwd` --dockerfile `pwd`/Dockerfile --destination docker.hooni.co.kr/${IMAGE_PATH}/${IMAGE_NAME}${IMAGE_VERSION}"
-// 				}
-// 			}
             steps {
                 container('kaniko') {
                     sh """
@@ -78,37 +63,37 @@ pipeline {
 		}
 
 		stage('Update ArgoCD Manifest') {
-			steps {
-				sh "mkdir argocd"
+            steps {
+                sh "mkdir argocd"
 
-				dir("argocd"){
+                dir("argocd"){
                     git credentialsId: "github-api-token", url: "https://${ARGOCD_GIT_URL}", branch: "${ARGOCD_GIT_BRANCH}"
 
-					sh "git config user.email 'lee990726@gmail.com'"
+                    sh "git config user.email 'lee990726@gmail.com'"
                     sh "git config user.name 'Hooni'"
-					sh "sed -i 's/${REPLACE_NAME}:.*\$/${IMAGE_NAME}${IMAGE_VERSION}/g' ${ARGOCD_DEPLOY_YAML_FILE}"
-					sh "git add ${ARGOCD_DEPLOY_YAML_FILE}"
-					sh "git commit -m '[UPDATE] docker image info -> ${IMAGE_NAME}${IMAGE_VERSION}'"
+                    sh "sed -i 's/${REPLACE_NAME}:.*\$/${IMAGE_NAME}${IMAGE_VERSION}/g' ${ARGOCD_DEPLOY_YAML_FILE}"
+                    sh "git add ${ARGOCD_DEPLOY_YAML_FILE}"
+                    sh "git commit -m '[UPDATE] docker image info -> ${IMAGE_NAME}${IMAGE_VERSION}'"
 
-					withCredentials([usernamePassword(credentialsId: "github-api-token", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-						sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${ARGOCD_GIT_URL}")
-					}
-				}
-			}
+                    withCredentials([usernamePassword(credentialsId: "github-api-token", passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${ARGOCD_GIT_URL}")
+                    }
+                }
+            }
 
-			post {
-				failure {
-					echo 'Updating ArgoCD manifest failed...'
-					updateGitlabCommitStatus name: 'deploy', state: 'failed'
-				}
-				success {
-					echo 'Updating ArgoCD manifest succeeded...'
-					updateGitlabCommitStatus name: 'deploy', state: 'success'
-				}
-		        always {
-		            cleanWs(deleteDirs: true, disableDeferredWipeout: true)
-		        }
-        	}
-		}
+            post {
+                failure {
+                    echo 'Updating ArgoCD manifest failed...'
+                    updateGitlabCommitStatus name: 'deploy', state: 'failed'
+                }
+                success {
+                    echo 'Updating ArgoCD manifest succeeded...'
+                    updateGitlabCommitStatus name: 'deploy', state: 'success'
+                }
+                always {
+                    cleanWs(deleteDirs: true, disableDeferredWipeout: true)
+                }
+            }
+        }
 	}
 }
