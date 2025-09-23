@@ -1,0 +1,15 @@
+###########################################################################
+### Application 설정
+###########################################################################
+application:
+
+  frontend:
+    scheme: http
+    host: admin.hooni.co.kr
+    port: 80
+  gateway: http://admin-gateway.hooni.co.kr
+
+  cors:
+    allowed-origin:
+    - http://admin.hooni.co.kr
+
