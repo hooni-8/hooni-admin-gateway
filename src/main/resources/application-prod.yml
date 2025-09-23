@@ -42,7 +42,7 @@ spring:
       host: 192.168.45.170
       port: 6379
       username: hooni
-      password: ENC(WHuTZOdeS3fB1Vz+cnFGVKMpMx2UoM+a4jFxQnIhBVEtrp2Rm6zY50l+H7P4uEG0)
+      password: redis1234
 
   ### Cloud 설정 ###
   webflux:
