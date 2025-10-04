@@ -71,7 +71,7 @@ spring:
 routers:
   defaults:
     template:
-      context: template
+      context: admin-profile
       scheme: http
       host: localhost
       port: 8080

@@ -72,10 +72,10 @@ spring:
 ###########################################################################
 routers:
   defaults:
-    template:
-      context: template
+    admin-profile:
+      context: admin-profile
       scheme: http
-      host: localhost
+      host: admin-api-profile-service.admin.svc
       port: 8080
 
 ###########################################################################
