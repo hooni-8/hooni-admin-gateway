@@ -68,13 +68,13 @@ spring:
 ###########################################################################
 ### Router data 설정
 ###########################################################################
-routers:
-  defaults:
-    template:
-      context: admin-profile
-      scheme: http
-      host: localhost
-      port: 8080
+#routers:
+#  defaults:
+#    template:
+#      context: admin-profile
+#      scheme: http
+#      host: localhost
+#      port: 8080
 
 ###########################################################################
 ### Jasypt 설정
