@@ -76,7 +76,7 @@ routers:
       context: admin-profile
       scheme: http
       host: admin-api-profile-service.admin.svc
-      port: 8080
+      port: 80
 
 ###########################################################################
 ### Jasypt 설정
