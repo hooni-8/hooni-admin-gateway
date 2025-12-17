@@ -66,6 +66,7 @@ spring:
         - /auth/refresh
         - /auth/register
         - /auth/existsUserId
+        - /test/disk/usage
 
 ###########################################################################
 ### Router data 설정
